@@ -27,23 +27,13 @@ namespace Esperecyan.Unity.VRMConverterForVRChat.VRChatToVRM
     {
         private static readonly string TemporaryFolderPath = "Assets/VRMConverterTemporary";
         private static readonly string TemporaryPrefabFileName = "temporary.prefab";
+
         private static readonly IEnumerable<string> VRMSupportedShaderNames = new[]
         {
-            "Standard",
-            "Standard (Specular setup)",
-            "Unlit/Color",
-            "Unlit/Texture",
-            "Unlit/Transparent",
-            "Unlit/Transparent Cutout",
-            "UniGLTF/NormalMapDecoder",
-            "UniGLTF/NormalMapEncoder",
-            "UniGLTF/StandardVColor",
-            "UniGLTF/UniUnlit",
-            "VRM/MToon",
-            "VRM/UnlitCutout",
-            "VRM/UnlitTexture",
-            "VRM/UnlitTransparent",
-            "VRM/UnlitTransparentZWrite",
+            "Standard", "Standard (Specular setup)", "Unlit/Color", "Unlit/Texture", "Unlit/Transparent",
+            "Unlit/Transparent Cutout", "UniGLTF/NormalMapDecoder", "UniGLTF/NormalMapEncoder",
+            "UniGLTF/StandardVColor", "UniGLTF/UniUnlit", "VRM/MToon", "VRM/UnlitCutout", "VRM/UnlitTexture",
+            "VRM/UnlitTransparent", "VRM/UnlitTransparentZWrite",
         };
 
         /// <summary>
@@ -79,7 +69,8 @@ namespace Esperecyan.Unity.VRMConverterForVRChat.VRChatToVRM
                 // 表情とシェイプキー名の組み合わせを取得
                 var presetShapeKeyNameWeightPairsPairs = presetVRChatBindingPairs.ToDictionary(
                     presetVRChatBindingPair => presetVRChatBindingPair.Key,
-                    presetVRChatBindingPair => VRChatExpressionsReplacer.ExtractShapeKeyNames(presetVRChatBindingPair.Value)
+                    presetVRChatBindingPair =>
+                        VRChatExpressionsReplacer.ExtractShapeKeyNames(presetVRChatBindingPair.Value)
                 );
 
                 // VRM設定1
@@ -87,7 +78,9 @@ namespace Esperecyan.Unity.VRMConverterForVRChat.VRChatToVRM
                 temporaryFolder.EnsureFolder();
                 var temporaryPrefabPath = temporaryFolder.Child(VRChatToVRMConverter.TemporaryPrefabFileName).Value;
                 VRMInitializer.Initialize(temporaryPrefabPath, clone);
-                Object.DestroyImmediate(clone.GetComponentInChildren<VRMSpringBone>()); // VRMInitializer.Initialize() によってアタッチされた空のVRMSpringBoneを削除
+                Object.DestroyImmediate(clone
+                    .GetComponentInChildren<
+                        VRMSpringBone>()); // VRMInitializer.Initialize() によってアタッチされた空のVRMSpringBoneを削除
                 VRChatToVRMConverter.SetFirstPersonOffset(clone);
                 VRChatToVRMConverter.SetLookAtBoneApplyer(clone);
                 var sourceAndDestination = clone.GetComponent<Animator>();
@@ -106,10 +99,11 @@ namespace Esperecyan.Unity.VRMConverterForVRChat.VRChatToVRM
                         destination: sourceAndDestination
                     );
                 }
+
                 VRChatToVRMConverter.RemoveUnusedColliderGroups(clone);
 
                 // 正規化
-                VRMBoneNormalizer.Execute(clone, forceTPose: true);
+                VRMBoneNormalizer.Execute(clone, forceTPose: true, useCurrentBlendShapeWeight: true);
 
                 // 全メッシュ結合
                 var combinedRenderer = CombineMeshesAndSubMeshes.Combine(
@@ -172,6 +166,7 @@ namespace Esperecyan.Unity.VRMConverterForVRChat.VRChatToVRM
                 {
                     Object.DestroyImmediate(clone);
                 }
+
                 AssetDatabase.DeleteAsset("Assets/VRMConverterTemporary");
             }
         }
@@ -206,6 +201,7 @@ namespace Esperecyan.Unity.VRMConverterForVRChat.VRChatToVRM
                     {
                         newMaterial.shader = Shader.Find("VRM/MToon");
                     }
+
                     newMaterial.renderQueue = material.renderQueue;
 
                     return alreadyDuplicatedMaterials[material]
@@ -226,6 +222,7 @@ namespace Esperecyan.Unity.VRMConverterForVRChat.VRChatToVRM
                 {
                     continue;
                 }
+
                 Object.DestroyImmediate(transform.gameObject);
             }
 
@@ -235,6 +232,7 @@ namespace Esperecyan.Unity.VRMConverterForVRChat.VRChatToVRM
                 {
                     continue;
                 }
+
                 Object.DestroyImmediate(component);
             }
         }
@@ -257,7 +255,7 @@ namespace Esperecyan.Unity.VRMConverterForVRChat.VRChatToVRM
 
             var settings = instance.GetComponent<VRCAvatarDescriptor>().customEyeLookSettings;
             if (settings.eyesLookingUp != null && settings.eyesLookingDown != null
-                && settings.eyesLookingLeft != null && settings.eyesLookingRight != null)
+                                               && settings.eyesLookingLeft != null && settings.eyesLookingRight != null)
             {
                 lookAtBoneApplyer.VerticalUp.CurveYRangeDegree
                     = Math.Min(-settings.eyesLookingUp.left.x, -settings.eyesLookingUp.right.x);
@@ -295,6 +293,5 @@ namespace Esperecyan.Unity.VRMConverterForVRChat.VRChatToVRM
                 }
             }
         }
-
     }
 }
